@@ -9,20 +9,28 @@ const productManager = new ProductManager();
 
 //Get Productos de bd con limite, pagina, orden, query
 router.get("/", async (req, res) => {
-  // //Filters
-  // const filter = req.query.filter || "";
-  // const filterVal = req.query.filterVal || "";
-  // //Pagina
-  // const page = req.query.page || 1;
-  // //Orden
-  // const sort = -1;
-  // //Limite
-  // const limit = 10;
+  //Filters
+  const filter = req.query.filter || "";
+  const filterVal = req.query.filterVal || "";
+  //Pagina
+  const page = req.query.page || 1;
+  //Orden
+  const sort = -1;
+  //Limite
+  const limit = 10;
 
   // //Socket.io
   // // req.socketServer.emit("getProducts", await productManager.getProducts());
   // //Enviar productos al todos los clientes
   // const products = await req.socketServer.emit("getProducts", products);
+
+  const products = await productManager.getProducts(
+    filter,
+    filterVal,
+    limit,
+    sort,
+    page
+  );
 
   //Respuesta
   res.send(await products);

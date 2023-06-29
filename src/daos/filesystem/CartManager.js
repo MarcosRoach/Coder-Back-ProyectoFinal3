@@ -22,7 +22,8 @@ class CartManager {
       const cart = await cartsModel.findById(cid).populate("products.product");
       return cart;
     } catch (error) {
-      return { error: "No existe el carrito" };
+      console.log("no carrito");
+      return error;
     }
   };
 
@@ -42,18 +43,17 @@ class CartManager {
     //Instancia ProductManager
     const productManager = new ProductManager();
     let cart;
-    let product;
 
     //Obtener carrito
     try {
-      cart = await this.getCartById(cid);
+      cart = await cartsModel.findById(cid);
     } catch {
       return { error: "No existe el carrito" };
     }
 
     //Obtener producto
     try {
-      product = await productManager.getProductById({ _id: pid });
+      await productManager.getProductById({ _id: pid });
     } catch {
       return { error: "No existe el producto" };
     }
@@ -64,7 +64,6 @@ class CartManager {
       const productInCart = cart.products.find(
         (product) => product.product._id == pid
       );
-      console.log(productInCart);
       //Si el producto ya esta en el carrito
       if (productInCart) {
         //Incrementar cantidad

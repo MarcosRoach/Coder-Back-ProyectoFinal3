@@ -8,19 +8,16 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   let products = await productManager.getProducts();
-  res.render("home", {
-    title: "Inicio",
-    products: products,
-  });
+  res.render("home");
 });
 
 router.get("/products", async (req, res) => {
   //page
-  let page = req.query.page || 1;
+  let page = req.query.page || 5;
   //Orden
   let sort = req.query.sort || -1;
   //Limite
-  let limit = req.query.limit || 5;
+  let limit = req.query.limit || 6;
   //Filtro
   let filter = req.query.filter || "";
   let filterVal = req.query.filterVal || "";
@@ -32,11 +29,11 @@ router.get("/products", async (req, res) => {
       filterVal,
       limit,
       sort,
-      page
+      (page = 3)
     );
 
     //Usar socket.io
-    req.socketServer.emit("getProducts", async (products) => {
+    req.socketServer.socket.emit("getProducts", async (products) => {
       res.render("products", {
         title: "Products",
         products: products,
@@ -48,6 +45,11 @@ router.get("/products", async (req, res) => {
       products: "No hay productos",
     });
   }
+});
+
+//Vista a Carritos
+router.get("/cart", (req, res) => {
+  res.render("cart");
 });
 
 export default router;
