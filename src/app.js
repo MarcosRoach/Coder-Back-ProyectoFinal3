@@ -13,6 +13,7 @@ import messagesRouter from "./routes/messages.router.js";
 import { Server } from "socket.io";
 
 import ProductManager from "./daos/filesystem/ProductManager.js";
+import CartManager from "./daos/filesystem/CartManager.js";
 
 //Inicializar express
 const app = express();
@@ -47,33 +48,14 @@ socketServer.on("connection", async (socket) => {
 
   //Intancia de productos
   let productManager = new ProductManager();
-
   //Emitir evento socket.io con los productos
-  //page
-  let page = 1;
-  //Orden
-  let sort = -1;
-  //Limite
-  let limit = 5;
-  //Filtro
-  let filter = "category";
-  let filterVal = "Cámaras";
-
-  socket.emit(
-    "getProducts",
-    await productManager.getProducts(filter, filterVal, limit, sort, page)
-  );
+  socket.emit("getProducts", await productManager.getProducts());
 
   //Agregar producto y renderizar en el cliente el nuevo producto
-  socket.on("add-product", async (productData) => {
-    await productManager.addProduct(productData);
-    socketServer.emit("productos", await productManager.getProducts());
-  });
-
-  //Eliminar producto y renderizar en el cliente
-  socket.on("delete-product", async (productID) => {
-    await productManager.deleteProduct(productID);
-    socketServer.emit("productos", await productManager.getAllProducts());
+  socket.on("addProductToCart", async (carritoID, productID) => {
+    //Intancia de carrito
+    let cartManager = new CartManager();
+    await cartManager.addProductToCart(carritoID, productID);
   });
 });
 
