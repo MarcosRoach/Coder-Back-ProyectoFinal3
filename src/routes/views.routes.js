@@ -6,11 +6,25 @@ let productManager = new ProductManager();
 
 const router = Router();
 
-router.get("/", async (req, res) => {
-  let products = await productManager.getProducts();
-  res.render("home");
+// router.get("/", async (req, res) => {
+//   let products = await productManager.getProducts();
+//   res.render("home");
+// });
+
+//Rutas session
+router.get("/", (req, res) => {
+  res.render("login");
 });
 
+router.get("/register", (req, res) => {
+  res.render("register");
+});
+
+router.get("/login", (req, res) => {
+  res.render("login");
+});
+
+//Vista a Productos
 router.get("/products", async (req, res) => {
   //page
   let page = req.query.page || 5;

@@ -1,5 +1,59 @@
 const socket = io();
 
+//Obtener datos de session mongo desde cookie
+(async () => {
+  try {
+    const result = await fetch("/api/sessions", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (result.status === 401) {
+      let sessionContainer = document.getElementById("session-container");
+      sessionContainer.innerHTML = "";
+
+      let sessionElement = document.createElement("div");
+      sessionElement.innerHTML = `
+        <p> No hay usuario logueado </p>
+        <button id="login"> Iniciar sesión </button>
+      `;
+
+      let loginButton = sessionElement.querySelector("#login");
+      loginButton.addEventListener("click", () => {
+        window.location.href = "/login";
+      });
+
+      sessionContainer.appendChild(sessionElement);
+    } else {
+      let session = await result.json();
+
+      let sessionContainer = document.getElementById("session-container");
+      sessionContainer.innerHTML = "";
+
+      let sessionElement = document.createElement("div");
+      sessionElement.innerHTML = `
+        <p> Nombre: ${session.name} </p>
+        <p> Email: ${session.email} </p>
+        <p> Edad: ${session.age} </p>
+        <p> Rol: ${session.role} </p>
+        <button id="logout"> Cerrar sesión </button>
+      `;
+
+      let logoutButton = sessionElement.querySelector("#logout");
+      logoutButton.addEventListener("click", async () => {
+        await fetch("/api/sessions/logout", {});
+        window.location.href = "/login";
+      });
+
+      sessionContainer.appendChild(sessionElement);
+    }
+  } catch (error) {
+    console.error({ error: "No se pudo obtener la session" });
+  }
+})();
+
 // Socket.on
 socket.on("getProducts", (products) => {
   //carritoID
@@ -43,6 +97,7 @@ socket.on("getProducts", (products) => {
   }
 });
 
+//Agregar producto al carrito
 function addCartProduct(carritoID, productId) {
   console.log("CarritoID: " + carritoID);
   console.log("ProductoID: " + productId);

@@ -8,6 +8,7 @@ const db = async () => {
     "mongodb+srv://roachmarcos:29768344Msr@cluster0.qwzygw8.mongodb.net/ecommerce?retryWrites=true&w=majority";
   let db;
   try {
+    //Conectar a la base de datos
     db = await mongoose.connect(uri);
 
     //Agregar productos

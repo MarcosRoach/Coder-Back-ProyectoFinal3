@@ -4,11 +4,14 @@ import handlebars from "express-handlebars";
 import __dirname from "./utils.js";
 
 import db from "./daos/db/mongo.js";
+import session from "express-session";
+import MongoStore from "connect-mongo";
 
 import productRouter from "./routes/products.router.js";
 import cartsRouter from "./routes/carts.router.js";
-import viewsRouter from "./routes/views.router.js";
+import viewsRouter from "./routes/views.routes.js";
 import messagesRouter from "./routes/messages.router.js";
+import sessionRouter from "./routes/session.router.js";
 
 import { Server } from "socket.io";
 
@@ -41,6 +44,18 @@ const socketServer = new Server(expressServer);
 
 //concetar a la base de datos
 db();
+//session
+app.use(
+  session({
+    store: new MongoStore({
+      mongoUrl:
+        "mongodb+srv://roachmarcos:29768344Msr@cluster0.qwzygw8.mongodb.net/ecommerce?retryWrites=true&w=majority",
+    }),
+    secret: "mongoSecret",
+    resave: true,
+    saveUninitialized: true,
+  })
+);
 
 //Socket.io connection
 socketServer.on("connection", async (socket) => {
@@ -77,16 +92,5 @@ app.use("/api/carts", cartsRouter);
 //Router Mensajes
 app.use("/api/messages", messagesRouter);
 
-//Socket.io connection
-const mensajes = [];
-socketServer.on("connection", (socket) => {
-  console.log("Nuevo cliente conectado!: " + socket.id);
-
-  //Recibo Mensajes
-  socket.on("message", (data) => {
-    //Guardar mensaje
-    mensajes.push({ socketId: socket.id, message: data });
-    //Actualizar mensajes
-    socketServer.emit("imprimir", mensajes);
-  });
-});
+//Router session
+app.use("/api/sessions", sessionRouter);
