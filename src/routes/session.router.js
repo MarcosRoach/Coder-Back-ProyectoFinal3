@@ -1,9 +1,12 @@
 import { Router } from "express";
 import { usersModel } from "../daos/mogodb/models/users.model.js";
+import { createHash } from "../utils.js";
+import { isValidPassword } from "../utils.js";
+import passport from "passport";
 
 const router = Router();
 
-// //Post register
+//Post register
 router.post("/register", async (req, res) => {
   try {
     const { first_name, last_name, email, age, password } = req.body;
@@ -21,14 +24,14 @@ router.post("/register", async (req, res) => {
       last_name,
       email,
       age,
-      password,
+      password: await createHash(password),
       role: "user",
     });
 
     //Enviar respuesta
     res.send({ status: "success", message: "Usuario creado con exito" });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    res.status(500).send({ message: "Error de Servidor" });
   }
 });
 
@@ -63,24 +66,61 @@ router.post("/login", async (req, res) => {
       }
 
       //Validar si la contraseña es correcta
-      if (user.password !== password) {
+      if (!(await isValidPassword(password, user.password))) {
         return res.status(400).send({ message: "Contraseña incorrecta" });
       }
     }
 
-    //Enviar respuesta
+    //Crear session
     req.session.user = {
       name: user.first_name + user.last_name,
       email: user.email,
       age: user.age,
       role: user.role,
     };
+    //Enviar respuesta
     res.send({
       status: "success",
       message: "Usuario logueado con exito: " + req.session.user.name,
     });
   } catch (error) {
     res.status(500).send({ error: error.message });
+  }
+});
+
+//Post resetPass
+router.post("/resetPass", async (req, res) => {
+  try {
+    //Obtener datos body
+    const { email, password } = req.body;
+
+    //Buscar usuario
+    const user = await usersModel.findOne({ email: email });
+
+    //Validar si el usuario existe
+    if (!user) {
+      return res.status(400).send({ message: "El usuario no existe" });
+    }
+    console.log(user);
+
+    //Validar que la contraseña no sea la misma que la anterior
+    if (await isValidPassword(password, user.password)) {
+      return res
+        .status(400)
+        .send({ message: "La contraseña no puede ser la misma" });
+    }
+
+    //Actualizar contraseña con hash
+    user.password = await createHash(password);
+
+    //Guardar usuario
+    await user.save();
+
+    //Enviar respuesta
+    return res.status(200).send({ message: "Contraseña cambiada con exito" });
+  } catch {
+    //Error de servidor
+    res.status(500).send({ message: "Error de servidor" });
   }
 });
 
@@ -105,5 +145,31 @@ router.get("/logout", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
+//Login con github
+router.get(
+  "/github",
+  passport.authenticate("github", { scope: "user:email" }),
+  (req, res) => {}
+);
+
+//Callback de github
+router.get(
+  "/githubcallback",
+  passport.authenticate("github", {
+    failureRedirect: "/login",
+  }),
+  async (req, res) => {
+    console.log("Usuario logueado con github Backend");
+    //Crear session
+    req.session.user = {
+      name: req.user.first_name + req.user.last_name,
+      email: req.user.email,
+      age: req.user.age,
+      role: req.user.role,
+    };
+    //Enviar respuesta
+    res.redirect("/products");
+  }
+);
 
 export default router;

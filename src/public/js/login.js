@@ -17,7 +17,8 @@ form.addEventListener("submit", (e) => {
     },
   }).then((result) => {
     if (result.status === 200) {
-      //Crear la session
+      console.log("Usuario logueado con exito Frontend");
+      //Redireccionar si el usuario es correcto
       window.location.replace("/products");
     } else {
       //Codigo para mostrar el mensaje de usuario/pass Incorecto

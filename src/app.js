@@ -6,6 +6,8 @@ import __dirname from "./utils.js";
 import db from "./daos/db/mongo.js";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import { initializePassport } from "./config/passport.config.js";
+import passport from "passport";
 
 import productRouter from "./routes/products.router.js";
 import cartsRouter from "./routes/carts.router.js";
@@ -44,7 +46,11 @@ const socketServer = new Server(expressServer);
 
 //concetar a la base de datos
 db();
-//session
+
+//Inicializar passport
+initializePassport();
+
+//session con mongo
 app.use(
   session({
     store: new MongoStore({
@@ -56,6 +62,9 @@ app.use(
     saveUninitialized: true,
   })
 );
+
+//Use passport
+app.use(passport.initialize());
 
 //Socket.io connection
 socketServer.on("connection", async (socket) => {
