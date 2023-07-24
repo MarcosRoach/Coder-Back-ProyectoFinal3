@@ -8,8 +8,9 @@ const usersSchema = new mongoose.Schema({
   last_name: String,
   email: String,
   age: Number,
-  password: String,
   role: String,
+  cartID: { type: mongoose.Schema.Types.ObjectId, ref: "carts" },
+  password: String,
 });
 
 //Exportar modelo

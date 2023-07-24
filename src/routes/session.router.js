@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { usersModel } from "../daos/mogodb/models/users.model.js";
+import { cartsModel } from "../daos/mogodb/models/cart.model.js";
 import { createHash } from "../utils.js";
 import { isValidPassword } from "../utils.js";
 import passport from "passport";
@@ -18,14 +19,17 @@ router.post("/register", async (req, res) => {
       return res.status(400).send({ message: "El usuario ya existe" });
     }
 
+    // Crear carrito de compras para el usuario
+    const cart = await cartsModel.create({ products: [], quantity: 0 });
     //Crear usuario
     const user = await usersModel.create({
       first_name,
       last_name,
       email,
       age,
-      password: await createHash(password),
       role: "user",
+      cartID: cart._id,
+      password: await createHash(password),
     });
 
     //Enviar respuesta
@@ -35,58 +39,64 @@ router.post("/register", async (req, res) => {
   }
 });
 
-//Post login
-router.post("/login", async (req, res) => {
-  let user;
+router.get("/failregister", (req, res) => {
+  res.status(400).send({ status: "failed", message: "Usuario ya existente" });
+});
+
+// Login local
+router.post("/login", passport.authenticate("login"), async (req, res) => {
   try {
-    const { email, password } = req.body;
-    //email a minusculas
-    email.toLowerCase();
-    //password a string y minusculas
-    password.toString().toLowerCase();
-
-    let user;
-
-    //Verificar si es admin
-    if (email === "adminCoder@coder.com" && password === "123") {
-      user = {
-        first_name: "coder",
-        last_name: "House",
-        email: "adminCoder@coder.com",
-        age: 0,
-        role: "admin",
-      };
-    } else {
-      user = await usersModel.findOne({ email: email });
-
-      //Validar si el usuario existe
-      if (!user) {
-        return res.status(400).send({ message: "El usuario es incorrecto" });
-        //Redireccionar
-      }
-
-      //Validar si la contraseña es correcta
-      if (!(await isValidPassword(password, user.password))) {
-        return res.status(400).send({ message: "Contraseña incorrecta" });
-      }
+    // Si el usuario no existe o la contraseña es incorrecta
+    if (!req.user) {
+      return res
+        .status(400)
+        .send({ message: "Usuario o contraseña incorrecta" });
     }
 
-    //Crear session
+    // Crear sesión
     req.session.user = {
-      name: user.first_name + user.last_name,
-      email: user.email,
-      age: user.age,
-      role: user.role,
+      name: req.user.first_name + " " + req.user.last_name,
+      email: req.user.email,
+      age: req.user.age,
+      role: req.user.role,
     };
-    //Enviar respuesta
+
+    // Enviar respuesta
     res.send({
       status: "success",
-      message: "Usuario logueado con exito: " + req.session.user.name,
+      message: "Usuario logueado con éxito: " + req.session.user.name,
     });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    // Si hay un error en el servidor
+    return res.status(500).send({ error: "Error en el servidor" });
   }
 });
+
+//Login con github
+router.get(
+  "/github",
+  passport.authenticate("github", { scope: "user:email" }),
+  (req, res) => {}
+);
+
+//Callback de github
+router.get(
+  "/githubcallback",
+  passport.authenticate("github", {
+    failureRedirect: "/login",
+  }),
+  async (req, res) => {
+    //Crear session
+    req.session.user = {
+      name: req.user.first_name + req.user.last_name,
+      email: req.user.email,
+      age: req.user.age,
+      role: req.user.role,
+    };
+    //Enviar respuesta
+    res.redirect("/products");
+  }
+);
 
 //Post resetPass
 router.post("/resetPass", async (req, res) => {
@@ -145,31 +155,23 @@ router.get("/logout", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
-//Login con github
-router.get(
-  "/github",
-  passport.authenticate("github", { scope: "user:email" }),
-  (req, res) => {}
-);
 
-//Callback de github
-router.get(
-  "/githubcallback",
-  passport.authenticate("github", {
-    failureRedirect: "/login",
-  }),
-  async (req, res) => {
-    console.log("Usuario logueado con github Backend");
-    //Crear session
-    req.session.user = {
-      name: req.user.first_name + req.user.last_name,
-      email: req.user.email,
-      age: req.user.age,
-      role: req.user.role,
-    };
-    //Enviar respuesta
-    res.redirect("/products");
+//Current user
+router.get("/current", async (req, res) => {
+  try {
+    //Buscar usuario en cookie
+    const user = req.session.user;
+
+    //Validar si hay usuario
+    if (!user) {
+      return res.status(401).send({ message: "No hay usuario logueado" });
+    }
+    //Retornar usuario
+    res.send(user);
+  } catch (error) {
+    //Error de servidor
+    res.status(500).send({ error: error.message });
   }
-);
+});
 
 export default router;

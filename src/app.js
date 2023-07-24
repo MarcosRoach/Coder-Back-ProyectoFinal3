@@ -8,6 +8,7 @@ import session from "express-session";
 import MongoStore from "connect-mongo";
 import { initializePassport } from "./config/passport.config.js";
 import passport from "passport";
+import cookieParser from "cookie-parser";
 
 import productRouter from "./routes/products.router.js";
 import cartsRouter from "./routes/carts.router.js";
@@ -47,8 +48,8 @@ const socketServer = new Server(expressServer);
 //concetar a la base de datos
 db();
 
-//Inicializar passport
-initializePassport();
+//session con cookies
+app.use(cookieParser("mongoSecret"));
 
 //session con mongo
 app.use(
@@ -63,8 +64,10 @@ app.use(
   })
 );
 
-//Use passport
+//Inicializar passport
+initializePassport();
 app.use(passport.initialize());
+app.use(passport.session());
 
 //Socket.io connection
 socketServer.on("connection", async (socket) => {

@@ -1,8 +1,13 @@
 import passport from "passport";
 import githubStrategy from "passport-github2";
+import LocalStrategy from "passport-local";
 import { usersModel } from "../daos/mogodb/models/users.model.js";
+import { cartsModel } from "../daos/mogodb/models/cart.model.js";
+import { createHash } from "../utils.js";
+import { isValidPassword } from "../utils.js";
 
 export const initializePassport = () => {
+  //github strategy
   passport.use(
     "github",
     new githubStrategy(
@@ -30,6 +35,57 @@ export const initializePassport = () => {
           });
           //Retornar el usuario
           return done(null, user);
+        }
+      }
+    )
+  );
+
+  //Login Strategy
+  passport.use(
+    "login",
+    new LocalStrategy(
+      {
+        usernameField: "email",
+      },
+      async (email, password, done) => {
+        try {
+          //pasar el email a minusculas
+          email.toLowerCase();
+          //pasar password a string y minusculas
+          password.toString().toLowerCase();
+
+          let user;
+
+          //Verificar si es admin
+          if (email === "adminCoder@coder.com" && password === "123") {
+            user = {
+              first_name: "coder",
+              last_name: "House",
+              email: "adminCoder@coder.com",
+              age: 0,
+              role: "admin",
+            };
+          } else {
+            //Buscar el usuario en la base de datos
+            user = await usersModel.findOne({ email: email });
+          }
+
+          //Validar si el usuario existe
+          if (!user) {
+            return done(null, false);
+          }
+
+          //Validar si la contraseña es correcta
+          if (!(await isValidPassword(password, user.password))) {
+            return done(null, false);
+          }
+
+          //Retornar el usuario
+          console.log("Usuario encontrado");
+          return done(null, user);
+        } catch (error) {
+          //Enviar error
+          return done(error);
         }
       }
     )

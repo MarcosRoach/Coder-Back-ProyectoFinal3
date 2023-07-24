@@ -10,7 +10,8 @@ class CartManager {
     try {
       //Crear carrito
       const cart = await cartsModel.create({ products: [], quantity: 0 });
-      return { success: "Carrito creado con exito" };
+      //Retornar carrito y mensaje
+      return { cart, message: "Carrito creado con exito" };
     } catch (error) {
       return { error: "No se pudo crear el carrito" + error };
     }

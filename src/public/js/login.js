@@ -1,8 +1,23 @@
+//Obtener los elementos del DOM
 const form = document.getElementById("loginForm");
 const statusLogin = document.getElementById("statusLogin");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const loginBtn = document.getElementById("loginBtn");
 
 //Ocultar el mensaje de error
 statusLogin.style.display = "none";
+
+//Login Btn disabled por defecto
+loginBtn.disabled = true;
+//Login Btn enabled si los campos estan completos
+password.addEventListener("input", () => {
+  if (email.value && password.value) {
+    loginBtn.disabled = false;
+  } else {
+    loginBtn.disabled = true;
+  }
+});
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();

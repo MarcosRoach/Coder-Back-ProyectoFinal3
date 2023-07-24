@@ -8,6 +8,11 @@ const router = Router();
 //Instancia CartManager
 const cartManager = new CartManager();
 
+//Crear Cart
+router.get("/newCart", async (req, res) => {
+  res.send(await cartManager.newCart());
+});
+
 //Get By id
 router.get("/:cid", async (req, res) => {
   //Id
@@ -34,7 +39,7 @@ router.post("/", async (req, res) => {
   res.send(await cartManager.newCart());
 });
 
-//Post Product to Cart
+//Add Product to Cart
 router.post("/:cid/product/:pid", async (req, res) => {
   //Id
   const cid = req.params.cid;
