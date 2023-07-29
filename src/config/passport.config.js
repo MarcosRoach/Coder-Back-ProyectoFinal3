@@ -25,11 +25,16 @@ export const initializePassport = () => {
           return done(null, user);
         } else {
           //Si no existe el usuario, crearlo
+
+          // Crear carrito de compras para el usuario
+          const cart = await cartsModel.create({ products: [], quantity: 0 });
+
           user = await usersModel.create({
             first_name: profile._json.name,
             last_name: "",
             email: profile._json.email,
             age: 20,
+            cartID: cart._id,
             password: "123",
             role: "user",
           });

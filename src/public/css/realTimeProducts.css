@@ -1,0 +1,51 @@
+.avatar-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+}
+.avatar-icon {
+  font-size: 3rem; /* Tamaño del icono ajustado */
+  margin: 0;
+  padding: 0;
+}
+.session-data {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.small-text {
+  font-size: 0.8rem; /* Tamaño de texto más pequeño */
+}
+.header-third {
+  width: 33.33%; /* Tamaño de 1/3 del header */
+}
+.small-btn {
+  padding: 5px 5px;
+  margin-top: 10px;
+  font-size: 0.8rem;
+}
+
+/* Paginacion */
+/* Estilo para el primer botón */
+.first-page {
+  background-color: #007bff;
+  color: #fff;
+}
+
+/* Estilo para el último botón */
+.last-page {
+  background-color: #007bff;
+  color: #fff;
+}
+
+/* Estilo para los botones intermedios */
+.intermediate-page {
+  background-color: #f8f9fa;
+  color: #007bff;
+}
+
+/* Estilos para los botones de paginación */
+.btn {
+  margin: 2px;
+}

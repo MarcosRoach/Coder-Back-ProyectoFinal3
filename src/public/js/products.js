@@ -1,5 +1,7 @@
 const socket = io();
 
+let sessionCartID;
+
 //Obtener datos de session mongo desde cookie
 (async () => {
   try {
@@ -28,6 +30,7 @@ const socket = io();
       sessionContainer.appendChild(sessionElement);
     } else {
       let session = await result.json();
+      sessionCartID = session.cartID;
 
       let sessionContainer = document.getElementById("session-container");
       sessionContainer.innerHTML = "";
@@ -38,6 +41,7 @@ const socket = io();
         <p> Email: ${session.email} </p>
         <p> Edad: ${session.age} </p>
         <p> Rol: ${session.role} </p>
+        <p> Carrito: ${session.cartID} </p>
         <button id="logout"> Cerrar sesión </button>
       `;
 
@@ -55,7 +59,7 @@ const socket = io();
 })();
 
 // Socket.on
-socket.on("getProducts", (products) => {
+socket.on("products", (products) => {
   //carritoID
   let carritoID;
 
@@ -65,7 +69,7 @@ socket.on("getProducts", (products) => {
 
   console.log(products);
 
-  for (let product of products.docs) {
+  for (let product of products.products) {
     // Crear elemento
     let productElement = document.createElement("div");
     productElement.innerHTML = `
@@ -87,7 +91,7 @@ socket.on("getProducts", (products) => {
     let addButton = productElement.querySelector("button");
     addButton.addEventListener("click", () => {
       // id del carrito
-      carritoID = "6499e24bb8f7e7f21a31b28d";
+      carritoID = sessionCartID;
       //id del producto
       addCartProduct(carritoID, product._id);
     });
@@ -98,15 +102,15 @@ socket.on("getProducts", (products) => {
 });
 
 //Agregar producto al carrito
-function addCartProduct(carritoID, productId) {
-  console.log("CarritoID: " + carritoID);
-  console.log("ProductoID: " + productId);
+// function addCartProduct(carritoID, productId) {
+//   console.log("CarritoID: " + carritoID);
+//   console.log("ProductoID: " + productId);
 
-  //Agregar producto al carrito
-  try {
-    socket.emit("addProductToCart", carritoID, productId);
-    alert("Producto agregado al carrito");
-  } catch (error) {
-    alert("No se pudo agregar el producto al carrito");
-  }
-}
+//   //Agregar producto al carrito
+//   try {
+//     socket.emit("addProductToCart", carritoID, productId);
+//     alert("Producto agregado al carrito");
+//   } catch (error) {
+//     alert("No se pudo agregar el producto al carrito");
+//   }
+// }

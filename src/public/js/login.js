@@ -34,7 +34,7 @@ form.addEventListener("submit", (e) => {
     if (result.status === 200) {
       console.log("Usuario logueado con exito Frontend");
       //Redireccionar si el usuario es correcto
-      window.location.replace("/products");
+      window.location.replace("/realTimeProducts");
     } else {
       //Codigo para mostrar el mensaje de usuario/pass Incorecto
       statusLogin.style.display = "block";

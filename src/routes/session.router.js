@@ -59,6 +59,7 @@ router.post("/login", passport.authenticate("login"), async (req, res) => {
       email: req.user.email,
       age: req.user.age,
       role: req.user.role,
+      cartID: req.user.cartID,
     };
 
     // Enviar respuesta
@@ -92,9 +93,10 @@ router.get(
       email: req.user.email,
       age: req.user.age,
       role: req.user.role,
+      cartID: req.user.cartID,
     };
     //Enviar respuesta
-    res.redirect("/products");
+    res.redirect("/realTimeProducts");
   }
 );
 

@@ -4,46 +4,6 @@ import { productsModel } from "../mogodb/models/products.model.js";
 class ProductManager {
   //Metodos
 
-  //Get Products de bd
-  getProducts = async (filter, filterVal, limit, sort, page) => {
-    //Filtro
-    const f = filter || "category";
-    const fv = filterVal || "Electronica";
-    const l = limit || 10;
-    const s = sort || -1;
-    let p;
-    if (page === undefined) {
-      p = 1;
-    } else {
-      p = page;
-    }
-
-    // console.log("Filtro: " + f);
-    // console.log("FiltroVal: " + fv);
-    // console.log("Limite: " + l);
-    // console.log("Orden: " + s);
-    // console.log("Page: " + p);
-
-    let filterPaginate = {};
-    if (f !== "" && fv !== "") {
-      filterPaginate[f] = fv;
-    }
-    filterPaginate[filter] = filterVal;
-    //Obtener productos
-    try {
-      const products = await productsModel.paginate(
-        {},
-        {
-          page: p,
-          limit: l,
-        }
-      );
-      return products;
-    } catch (error) {
-      return { error: "No Existen productos" };
-    }
-  };
-
   getAllProducts = async () => {
     let products = await productsModel.find().lean();
     return products;
@@ -117,6 +77,32 @@ class ProductManager {
       return { error };
     }
   };
+
+  async getProducts(
+    limit = 10,
+    page = 1,
+    sort = 1,
+    filtro = null,
+    filtroVal = null
+  ) {
+    let whereOptions = {};
+
+    // se podría hacer una validación mejor
+    if (filtro != "" && filtroVal != "") {
+      whereOptions = { [filtro]: filtroVal };
+    }
+
+    const options = {
+      limit,
+      page,
+      sort: { price: sort },
+    };
+
+    if (sort === 1 || sort === -1) options.sort = { price: sort };
+
+    const result = await productsModel.paginate(whereOptions, options);
+    return result;
+  }
 }
 
 export default ProductManager;

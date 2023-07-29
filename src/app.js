@@ -12,23 +12,23 @@ import cookieParser from "cookie-parser";
 
 import productRouter from "./routes/products.router.js";
 import cartsRouter from "./routes/carts.router.js";
-import viewsRouter from "./routes/views.routes.js";
+import viewsRouter from "./routes/views.router.js";
 import messagesRouter from "./routes/messages.router.js";
 import sessionRouter from "./routes/session.router.js";
 
 import { Server } from "socket.io";
 
-import ProductManager from "./daos/filesystem/ProductManager.js";
-import CartManager from "./daos/filesystem/CartManager.js";
+import ProductManager from "./daos/managers/ProductManager.js";
+import CartManager from "./daos/managers/CartManager.js";
 
 //Inicializar express
 const app = express();
 
-//Middelware para recibir json
+//Habilitar Servidor para recibir JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-//Carpetas estaticas
+//Carpetas estaticas public
 app.use(express.static(__dirname + "/public"));
 
 //Configuracion de handlebars
@@ -41,9 +41,6 @@ const port = 8080;
 const expressServer = app.listen(port, () => {
   console.log(`Servidor express corriendo en el puerto ${port}`);
 });
-
-//Inicializar socket.io
-const socketServer = new Server(expressServer);
 
 //concetar a la base de datos
 db();
@@ -69,20 +66,32 @@ initializePassport();
 app.use(passport.initialize());
 app.use(passport.session());
 
-//Socket.io connection
+//Intancia de productos
+let productManager = new ProductManager();
+
+const socketServer = new Server(expressServer);
+
 socketServer.on("connection", async (socket) => {
-  console.log("Nuevo cliente conectado! + " + socket.id);
+  console.log("Nuevo cliente conectado " + socket.id);
 
-  //Intancia de productos
-  let productManager = new ProductManager();
-  //Emitir evento socket.io con los productos
-  socket.emit("getProducts", await productManager.getProducts());
+  //server emite productos al cliente que se conecta
+  const products = await productManager.getProducts();
+  socket.emit("products", products);
 
-  //Agregar producto y renderizar en el cliente el nuevo producto
-  socket.on("addProductToCart", async (carritoID, productID) => {
-    //Intancia de carrito
-    let cartManager = new CartManager();
-    await cartManager.addProductToCart(carritoID, productID);
+  //server escucha buscar producto filtrado
+  socket.on("productsFilter", async (filters) => {
+    console.log("Filtros recibidos " + filters.page);
+    const { limit, page, sort, filtro, filtroVal } = filters;
+
+    const filtersProducts = await productManager.getProducts(
+      limit,
+      page,
+      sort,
+      filtro,
+      filtroVal
+    );
+    console.log("Productos filtrados " + filtersProducts.page);
+    socket.emit("productsFilters", filtersProducts);
   });
 });
 
@@ -92,6 +101,7 @@ app.use((req, res, next) => {
   next();
 });
 
+//Rutas
 //Router Views
 app.use("/", viewsRouter);
 
