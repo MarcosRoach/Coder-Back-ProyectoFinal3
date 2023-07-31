@@ -116,6 +116,7 @@ const renderProducts = (products) => {
   let nextPageElement = document.createElement("button");
   nextPageElement.classList.add("btn", "btn-primary", "small-btn", "col-2");
   nextPageElement.innerText = "Página siguiente";
+
   nextPageElement.addEventListener("click", async () => {
     const nroPage = products.nextPage;
     await getProductsPage(nroPage);
@@ -129,28 +130,25 @@ const renderProducts = (products) => {
 getProducts();
 
 //FILTROS
+//Obtener Boton Limpiar Filtros
+const clearFiltersButton = document.getElementById("clear-filters");
+//Obtener Boton Aplicar Filtros
+const applyFiltersButton = document.getElementById("apply-filters");
 //Obtener del DOM los filtros
 const filtersForm = document.getElementById("filters-form");
-
 //Agregar evento al submit del formulario de filtros
 filtersForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  //Obtener valores de los filtros
-  const filters = {
-    //Si el Limit es 0, asignar 10, si no, asignar el valor del input
-    limit: filtersForm.limit.value === "" ? 10 : filtersForm.limit.value,
-    //Si el Sort es Ascendente, asignar 1, si es Descendente, asignar -1
-    sort: filtersForm.sort.value === "asc" ? 1 : -1,
-    filtro: filtersForm.category.value === "Todos" ? null : "category",
-    filtroVal:
-      filtersForm.category.value === "Todos"
-        ? null
-        : filtersForm.category.value,
-  };
-  console.log("Filtros enviados: ", filters);
-
+  const filters = await getFilters();
+  console.log(filters);
   //Emitir busqueda de productos filtrados al servidor
   socket.emit("productsFilter", filters);
+});
+//Limpiar filtros
+clearFiltersButton.addEventListener("click", async () => {
+  filtersForm.reset();
+  //Ejecutar listener del submit del formulario de filtros
+  filtersForm.dispatchEvent(new Event("submit"));
 });
 
 //Obtener Foiltros Cargados del DOM
@@ -159,7 +157,7 @@ const getFilters = async () => {
     //Si el Limit es 0, asignar 10, si no, asignar el valor del input
     limit: filtersForm.limit.value === "" ? 10 : filtersForm.limit.value,
     //Si el Sort es Ascendente, asignar 1, si es Descendente, asignar -1
-    sort: filtersForm.sort.value === "asc" ? -1 : 1,
+    sort: filtersForm.sort.value === "asc" ? 1 : -1,
     ////si filtroVal es = a "Todos", asignar null, si no, asignar "category"
     filtro: filtersForm.category.value === "Todos" ? null : "category",
     //si filtroVal es = a "Todos", asignar null, si no, asignar el valor del input
