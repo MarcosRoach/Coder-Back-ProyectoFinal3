@@ -8,12 +8,15 @@ form.addEventListener("submit", async (e) => {
 
   // Validar los campos aquí antes de enviar la solicitud
 
-  try {
-    const data = new FormData(form);
-    const obj = {};
-    data.forEach((value, key) => (obj[key] = value));
+  const data = new FormData(form);
+  const obj = Object.fromEntries(data.entries());
 
-    const response = await fetch("/api/sessions/register", {
+  console.log("Datos Enviados");
+  console.log(obj);
+
+  try {
+    // Enviar la solicitud
+    const res = await fetch("/api/sessions/register", {
       method: "POST",
       body: JSON.stringify(obj),
       headers: {
@@ -21,18 +24,24 @@ form.addEventListener("submit", async (e) => {
       },
     });
 
-    const json = await response.json();
-    console.log("status " + response.status);
+    console.log("Resp");
+    console.log(res);
 
-    if (response.status == 200) {
+    //Si res es ok, redirigir a login
+    if (res.ok) {
       alert("Usuario creado con éxito");
       window.location.href = "/login";
     } else {
       // Mostrar el mensaje de usuario existente
       statusUsuario.style.display = "block";
       statusUsuario.textContent = "El usuario ya existe";
-      // Enfocar en el primer input del formulario
+      form.reset();
       form.elements[0].focus();
+
+      // Ocultar el mensaje después de 3 segundos
+      setTimeout(() => {
+        statusUsuario.style.display = "none";
+      }, 3000); // 3000 milisegundos = 3 segundos
     }
   } catch (error) {
     alert(

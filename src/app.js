@@ -80,7 +80,7 @@ socketServer.on("connection", async (socket) => {
 
   //server escucha buscar producto filtrado
   socket.on("productsFilter", async (filters) => {
-    console.log("Filtros recibidos " + filters.page);
+    console.log("Filtros recibidos: ", filters);
     const { limit, page, sort, filtro, filtroVal } = filters;
 
     const filtersProducts = await productManager.getProducts(
@@ -90,7 +90,6 @@ socketServer.on("connection", async (socket) => {
       filtro,
       filtroVal
     );
-    console.log("Productos filtrados " + filtersProducts.page);
     socket.emit("productsFilters", filtersProducts);
   });
 });

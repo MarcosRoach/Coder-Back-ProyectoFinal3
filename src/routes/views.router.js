@@ -6,11 +6,6 @@ let productManager = new ProductManager();
 
 const router = Router();
 
-// router.get("/", async (req, res) => {
-//   let products = await productManager.getProducts();
-//   res.render("home");
-// });
-
 //Rutas session
 router.get("/", (req, res) => {
   res.render("login");
@@ -81,6 +76,11 @@ router.get("/realtimeproducts", async (req, res) => {
 //Vista a Carritos
 router.get("/cart", (req, res) => {
   res.render("cart");
+});
+
+//Vista a Current User
+router.get("/current", (req, res) => {
+  res.render("current");
 });
 
 export default router;

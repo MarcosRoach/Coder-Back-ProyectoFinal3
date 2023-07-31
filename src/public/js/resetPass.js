@@ -6,27 +6,29 @@ const statusResetPass = document.getElementById("statusResetPass");
 //Ocultar el mensaje de error
 statusResetPass.style.display = "none";
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  //Obtener los datos del formulario
   const data = new FormData(form);
-  //Convertir los datos a un objeto
-  const obj = {};
-  //Recorrer los datos del formulario
-  data.forEach((value, key) => (obj[key] = value));
+  const obj = Object.fromEntries(data.entries());
 
-  //Enviar los datos al servidor
-  fetch("/api/sessions/resetPass", {
-    method: "POST",
-    body: JSON.stringify(obj),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  }).then((result) => {
-    //Verificar si el resultado es 200
-    if (result.status === 200) {
-      console.log("por aca");
+  console.log("Datos Enviados");
+  console.log(obj);
+
+  try {
+    // Enviar la solicitud
+    const res = await fetch("/api/sessions/resetPass", {
+      method: "POST",
+      body: JSON.stringify(obj),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("Resp");
+    console.log(res);
+
+    if (res.ok) {
       //Mostrar mensaje de exito con clase success
       statusResetPass.style.display = "block";
       statusResetPass.classList.remove("alert-danger");
@@ -36,24 +38,26 @@ form.addEventListener("submit", (e) => {
       //Redireccionar a login
       window.location.replace("/login");
     } else {
-      //tomar el valor del mensaje de error
-      result.json().then((data) => {
-        //Mostrar mensaje de error con clase error
-        statusResetPass.style.display = "block";
-        statusResetPass.classList.remove("alert-success");
-        statusResetPass.classList.add("alert-danger");
-        statusResetPass.textContent = data.message;
+      //Mostrar mensaje de error con clase error
+      statusResetPass.style.display = "block";
+      statusResetPass.classList.remove("alert-success");
+      statusResetPass.classList.add("alert-danger");
+      statusResetPass.textContent = "Error al cambiar la contraseña";
 
-        //Borrar el mensaje de error despues de 3 segundos
-        setTimeout(() => {
-          statusResetPass.style.display = "none";
-        }, 3000);
+      //Borrar el mensaje de error despues de 3 segundos
+      setTimeout(() => {
+        statusResetPass.style.display = "none";
+      }, 3000);
 
-        //Limpia el formulario
-        form.reset();
-        //Ubicar el cursor en el primer input
-        form[0].focus();
-      });
+      //Limpia el formulario
+      form.reset();
+      //Ubicar el cursor en el primer input
+      form[0].focus();
     }
-  });
+  } catch (error) {
+    console.log("Error " + error);
+    alert(
+      "Ocurrió un error al enviar el formulario. Inténtalo nuevamente más tarde."
+    );
+  }
 });
