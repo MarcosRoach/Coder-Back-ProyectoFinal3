@@ -28,12 +28,18 @@ const renderSession = async () => {
   <p class="small-text"><strong>Usuario: </strong>${session.email} |
     <strong>Rol: ${session.role}</strong></p>
   <p class="small-text"><strong>Carrito: ${session.cartID} </strong> </p>
+  <button class="btn btn-warning small-btn" id="profile">Perfil</button>
   <button class="btn btn-danger small-btn" id="logout">Cerrar Sesión</button>
   `;
   let logoutButton = sessionElement.querySelector("#logout");
   logoutButton.addEventListener("click", async () => {
     await fetch("/api/sessions/logout", {});
     window.location.href = "/login";
+  });
+
+  let profileButton = sessionElement.querySelector("#profile");
+  profileButton.addEventListener("click", async () => {
+    window.location.href = "/current";
   });
 
   sessionContainer.appendChild(sessionElement);
@@ -63,11 +69,11 @@ const renderProducts = (products) => {
     productElement.classList.add("product");
     productElement.innerHTML = `
     <div class="product-img">
-      <img src="public/img/No-Image-Placeholder.svg" alt="${product.title}" />
+      <img src="img/No-Image-Placeholder.png" class="img-thumbnail" style="width: 100%; height: 200px;" alt="${product.title}" />
     </div>
     <div class="product-info">
-      <h4 class="product-title">${product.title}</h4>
-      <p class="product-description">$ ${product.description}</p>
+      <h5 class="product-title" style= "min-height: 30px;">${product.title}</h5>
+      <p class="product-description" style= "min-height: 80px;">$ ${product.description}</p>
       <p class="product-category">Category: ${product.category}</p>
       <p class="product-stock">Price u$d: ${product.price}</p>
       <button class="btn btn-primary small-btn" id="addProduct${product._id}">Agregar al carrito</button>
@@ -125,18 +131,23 @@ getProducts();
 //FILTROS
 //Obtener del DOM los filtros
 const filtersForm = document.getElementById("filters-form");
+
 //Agregar evento al submit del formulario de filtros
 filtersForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   //Obtener valores de los filtros
   const filters = {
     //Si el Limit es 0, asignar 10, si no, asignar el valor del input
-    limit: filtersForm.limit.value === "0" ? 10 : filtersForm.limit.value,
+    limit: filtersForm.limit.value === "" ? 10 : filtersForm.limit.value,
     //Si el Sort es Ascendente, asignar 1, si es Descendente, asignar -1
-    sort: filtersForm.sort.value === "asc" ? -1 : 1,
-    filtro: "category",
-    filtroVal: filtersForm.category.value,
+    sort: filtersForm.sort.value === "asc" ? 1 : -1,
+    filtro: filtersForm.category.value === "Todos" ? null : "category",
+    filtroVal:
+      filtersForm.category.value === "Todos"
+        ? null
+        : filtersForm.category.value,
   };
+  console.log("Filtros enviados: ", filters);
 
   //Emitir busqueda de productos filtrados al servidor
   socket.emit("productsFilter", filters);
@@ -159,6 +170,7 @@ const getFilters = async () => {
   };
   return filters;
 };
+
 //Obtener productos de pagina específica
 const getProductsPage = async (nroPage) => {
   const filters = await getFilters();
