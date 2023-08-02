@@ -1,6 +1,6 @@
 //Router User
 import { Router } from "express";
-import ProductManager from "../daos/managers/ProductManager.js";
+import ProductManager from "../daos/mogodb/class/ProductManager.js";
 
 const router = Router();
 

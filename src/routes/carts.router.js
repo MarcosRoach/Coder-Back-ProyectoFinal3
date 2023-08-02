@@ -1,6 +1,6 @@
 //Router Carts
 import { Router } from "express";
-import CartManager from "../daos/managers/CartManager.js";
+import CartManager from "../daos/mogodb/class/CartManager.js";
 import { Server } from "socket.io";
 
 const router = Router();

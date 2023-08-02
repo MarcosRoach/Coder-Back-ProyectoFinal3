@@ -1,6 +1,6 @@
 import { Router } from "express";
 import __dirname from "../utils.js";
-import ProductManager from "../daos/managers/ProductManager.js";
+import ProductManager from "../daos/mogodb/class/ProductManager.js";
 
 let productManager = new ProductManager();
 

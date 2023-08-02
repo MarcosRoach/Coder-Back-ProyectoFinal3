@@ -18,8 +18,22 @@ import sessionRouter from "./routes/session.router.js";
 
 import { Server } from "socket.io";
 
-import ProductManager from "./daos/managers/ProductManager.js";
-import CartManager from "./daos/managers/CartManager.js";
+import ProductManager from "./daos/mogodb/class/ProductManager.js";
+import CartManager from "./daos/mogodb/class/CartManager.js";
+
+//Dotenv
+import dotenv from "dotenv";
+
+//Commander
+import { Command } from "commander";
+const program = new Command();
+program.option("--mode <mode>", "Modo de ejecucion", "dev");
+program.parse();
+const mode = program.opts().mode;
+console.log("Modo de ejecucion: ", mode);
+dotenv.config({
+  path: mode === "dev" ? ".env.development" : ".env.production",
+});
 
 //Inicializar express
 const app = express();
@@ -37,16 +51,14 @@ app.set("views", __dirname + "/views");
 app.set("view engine", "handlebars");
 
 //Levantar el servidor
-const port = 8080;
-const expressServer = app.listen(port, () => {
-  console.log(`Servidor express corriendo en el puerto ${port}`);
+const expressServer = app.listen(process.env.PORT, () => {
+  console.log(`Servidor express corriendo en el puerto ${process.env.PORT}`);
 });
-
 //concetar a la base de datos
 db();
 
 //session con cookies
-app.use(cookieParser("mongoSecret"));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 //session con mongo
 app.use(
@@ -55,7 +67,7 @@ app.use(
       mongoUrl:
         "mongodb+srv://roachmarcos:29768344Msr@cluster0.qwzygw8.mongodb.net/ecommerce?retryWrites=true&w=majority",
     }),
-    secret: "mongoSecret",
+    secret: process.env.MONGO_SECRET,
     resave: true,
     saveUninitialized: true,
   })

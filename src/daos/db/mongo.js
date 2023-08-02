@@ -4,12 +4,13 @@ import mongoose from "mongoose";
 //funcion para conectar a la base de datos
 const db = async () => {
   //Conectar a la base de datos
-  const uri =
-    "mongodb+srv://roachmarcos:29768344Msr@cluster0.qwzygw8.mongodb.net/ecommerce?retryWrites=true&w=majority";
+  const URL = process.env.DATABASE_URL;
+  console.log(URL);
+
   let db;
   try {
     //Conectar a la base de datos
-    db = await mongoose.connect(uri);
+    db = await mongoose.connect(URL);
 
     //Agregar productos
     // const art = [

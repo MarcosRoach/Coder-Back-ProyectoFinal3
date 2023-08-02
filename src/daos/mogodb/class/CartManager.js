@@ -1,4 +1,4 @@
-import { cartsModel } from "../mogodb/models/cart.model.js";
+import { cartsModel } from "../models/cart.model.js";
 import ProductManager from "./ProductManager.js";
 
 //Clase

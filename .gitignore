@@ -24,3 +24,7 @@ desktop.ini
 *.sln
 *.sw?
 desktop.ini
+
+# Ignorar archivos .env
+.env
+
