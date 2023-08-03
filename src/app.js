@@ -112,7 +112,7 @@ app.use((req, res, next) => {
   next();
 });
 
-//Rutas
+//RUTAS
 //Router Views
 app.use("/", viewsRouter);
 

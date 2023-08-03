@@ -1,5 +1,7 @@
 //Router User
 import { Router } from "express";
+import createProductController from "../controllers/product.controller.js";
+import getProductController from "../controllers/product.controller.js";
 import ProductManager from "../daos/mogodb/class/ProductManager.js";
 
 const router = Router();
@@ -7,58 +9,11 @@ const router = Router();
 //Instancia ProductManager
 const productManager = new ProductManager();
 
-//Get Productos de bd con limite, pagina, orden, query
-// router.get("/", async (req, res) => {
-//   const limit = Number(req.query.limit) || 10;
-//   const page = Number(req.query.page) || 1;
-//   const sort = Number(req.query.sort) || 0;
-//   const filtro = req.query.filtro || "";
-//   const filtroVal = req.query.filtroVal || "";
-
-//   const products = await productManager.getProducts(
-//     limit,
-//     page,
-//     sort,
-//     filtro,
-//     filtroVal
-//   );
-//   res.send(products);
-// });
-
 //Get by id
-router.get("/:pid", async (req, res) => {
-  //Id
-  const pid = req.params.pid;
-
-  //Respuesta
-  res.send(await productManager.getProductById(pid));
-});
+router.get("/:pid", getProductController.getProduct);
 
 // Post
-router.post("/", async (req, res) => {
-  //Body
-  let producto = JSON.stringify(req.body);
-  //Agregar producto
-  await productManager.addProduct(producto);
-
-  //Limite de productos
-  const page = Number(req.query.page) || 1;
-
-  //Obtener productos
-
-  const products = await productManager.getProducts(
-    "category",
-    "Electrónicos",
-    3,
-    -1,
-    page
-  );
-  //Enviar productos al todos los clientes
-  req.socketServer.emit("getProducts", { ...products });
-
-  //Respuesta
-  res.send({ status: "success", message: "Producto agregado" });
-});
+router.post("/", createProductController.createProducts);
 
 // Put
 router.put("/:pid", async (req, res) => {

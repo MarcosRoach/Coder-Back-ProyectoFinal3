@@ -32,23 +32,21 @@ class ProductManager {
 
   //Add Product
   addProduct = async (product) => {
-    //pasa a json
-    const findProduct = JSON.parse(product);
-    //Verificar si existe el producto
-    const productExist = await productsModel.findOne({
-      code: findProduct.code,
-    });
-
-    if (productExist) {
-      return { error: "Ya existe el producto" };
-    }
-
     //Agregar producto
     try {
-      const newProduct = await productsModel.create(findProduct);
-      return { success: "Producto agregado" + JSON.stringify(newProduct) };
+      console.log("Producto a agregar DAO: ");
+      console.log(product);
+      const newProduct = await productsModel.create(product);
+      return {
+        success: true,
+        message: "Producto agregado correctamente.",
+        product: newProduct,
+      };
     } catch (error) {
-      return { error: error };
+      return {
+        success: false,
+        message: "Error al agregar el producto." + error,
+      };
     }
   };
 
