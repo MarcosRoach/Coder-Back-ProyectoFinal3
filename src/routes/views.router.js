@@ -60,12 +60,6 @@ router.get("/products", async (req, res) => {
 //Vista a Productos en tiempo real
 router.get("/realtimeproducts", async (req, res) => {
   try {
-    const limit = Number(req.query.limit);
-    const page = Number(req.query.page);
-    let sort = Number(req.query.sort);
-    let filtro = req.query.filtro;
-    let filtroVal = req.query.filtroVal;
-
     let products = await productManager.getProducts();
     res.render("realTimeProducts", products);
   } catch (error) {

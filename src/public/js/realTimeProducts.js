@@ -52,6 +52,8 @@ renderSession();
 const getProducts = async () => {
   try {
     socket.on("products", (products) => {
+      console.log("Productos:");
+      console.log(products);
       renderProducts(products);
     });
   } catch (error) {
@@ -118,6 +120,7 @@ const renderProducts = (products) => {
   nextPageElement.innerText = "Página siguiente";
 
   nextPageElement.addEventListener("click", async () => {
+    console.log("Next Page" + products.nextPage);
     const nroPage = products.nextPage;
     await getProductsPage(nroPage);
   });
@@ -151,7 +154,7 @@ clearFiltersButton.addEventListener("click", async () => {
   filtersForm.dispatchEvent(new Event("submit"));
 });
 
-//Obtener Foiltros Cargados del DOM
+//Obtener Filtros Cargados del DOM
 const getFilters = async () => {
   const filters = {
     //Si el Limit es 0, asignar 10, si no, asignar el valor del input
@@ -173,8 +176,10 @@ const getFilters = async () => {
 const getProductsPage = async (nroPage) => {
   const filters = await getFilters();
   filters.page = nroPage; //Asignar el número de página a los filtros
+  console.log("Filtros de página: ", filters);
   try {
     //Emitir busqueda de productos filtrados al servidor
+    console.log("Emitiendo busqueda de productos filtrados al servidor");
     socket.emit("productsFilter", filters);
   } catch (error) {
     console.error("Error al obtener los productos:", error);

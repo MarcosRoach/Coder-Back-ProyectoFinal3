@@ -2,22 +2,30 @@ import { productsModel } from "../models/products.model.js";
 
 //Clase
 class ProductManager {
-  //Metodos
+  //METODOS
+
+  //Get Product by id
+  getProductById = async (pid) => {
+    try {
+      const product = await productsModel.findById(pid);
+
+      return {
+        success: true,
+        message: "Producto Encontrado",
+        product: product,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: "No existe el producto",
+        product: null,
+      };
+    }
+  };
 
   getAllProducts = async () => {
     let products = await productsModel.find().lean();
     return products;
-  };
-
-  //Get Product by id
-  getProductById = async (pid) => {
-    //Obtener producto
-    try {
-      const product = await productsModel.findById(pid);
-      return product;
-    } catch (error) {
-      return { error: "No Existe el producto" };
-    }
   };
 
   //Get Product by code
@@ -51,53 +59,37 @@ class ProductManager {
   };
 
   //Update Product
-  updateProduct = async (pid, product) => {
-    console.log(pid);
+  updateProductById = async (pid, product) => {
     //Actualizar producto
     try {
+      //mongoose updateOne
       const updateProduct = await productsModel.updateOne(
         { _id: pid },
-        { $set: JSON.parse(product) }
+        { $set: product }
       );
-      return { success: "Producto actualizado" };
+      return { success: "Producto actualizado" + updateProduct };
     } catch (error) {
-      return { error };
+      return { message: "zzzzzzzzzz: " + error };
     }
   };
 
   //Delete Product
-  deleteProduct = async (pid) => {
+  deleteProductById = async (pid) => {
     //Eliminar producto
     try {
       const deleteProduct = await productsModel.deleteOne({ _id: pid });
-      return { success: "Producto eliminado" + deleteProduct };
+      return {
+        success: true,
+        message: "Producto eliminado correctamente.",
+        product: deleteProduct,
+      };
     } catch (error) {
       return { error };
     }
   };
 
-  async getProducts(
-    limit = 10,
-    page = 1,
-    sort = 1,
-    filtro = null,
-    filtroVal = null
-  ) {
-    let whereOptions = {};
-
-    // se podría hacer una validación mejor
-    if (filtro != "" && filtroVal != "") {
-      whereOptions = { [filtro]: filtroVal };
-    }
-
-    const options = {
-      limit,
-      page,
-      sort: { price: sort },
-    };
-
-    if (sort === 1 || sort === -1) options.sort = { price: sort };
-
+  //Get Products
+  async getProducts(whereOptions, options) {
     const result = await productsModel.paginate(whereOptions, options);
     return result;
   }

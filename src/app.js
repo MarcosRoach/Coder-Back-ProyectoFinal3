@@ -21,6 +21,8 @@ import { Server } from "socket.io";
 import ProductManager from "./daos/mogodb/class/ProductManager.js";
 import CartManager from "./daos/mogodb/class/CartManager.js";
 
+import productController from "./controllers/product.controller.js";
+
 //Dotenv
 import dotenv from "dotenv";
 
@@ -88,21 +90,13 @@ socketServer.on("connection", async (socket) => {
 
   //server emite productos al cliente que se conecta
   const products = await productManager.getProducts();
+  console.log("Productos enviados: ");
   socket.emit("products", products);
 
   //server escucha buscar producto filtrado
   socket.on("productsFilter", async (filters) => {
-    console.log("Filtros recibidos: ", filters);
-    const { limit, page, sort, filtro, filtroVal } = filters;
-
-    const filtersProducts = await productManager.getProducts(
-      limit,
-      page,
-      sort,
-      filtro,
-      filtroVal
-    );
-    socket.emit("productsFilters", filtersProducts);
+    const filteredProducts = await productController.getProducts(filters);
+    socket.emit("productsFilters", filteredProducts);
   });
 });
 
